@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World - Full Screen Black Background</title>
+    <style>
+        /* デフォルトのマージンとパディングをリセット */
+        html, body {
+            margin: 0;
+            padding: 0;
+            /* 画面の高さいっぱいに設定 */
+            height: 100%;
+            /* 背景色を黒に設定 */
+            background-color: black;
+            /* 文字色を白に設定 */
+            color: white;
+            /* テキストを中央揃え */
+            text-align: center;
+            /* 画面全体を使ってコンテンツを配置するためのFlexbox設定 */
+            display: flex;
+            /* 水平方向の中央揃え */
+            justify-content: center;
+            /* 垂直方向の中央揃え */
+            align-items: center;
+        }
+
+        /* 画面いっぱいに文字を表示するためのスタイル */
+        .full-screen-text {
+            /* ビューポート（画面）の幅の単位（vw）を使って、文字サイズを非常に大きくする */
+            /* 画面幅の15%のサイズに設定。画面のサイズに応じて文字の大きさが変わる */
+            font-size: 15vw; 
+            /* 画面の中央に配置するため、最大幅を設定 */
+            max-width: 90%; 
+            /* 改行を防ぎ、一行で表示する */
+            white-space: nowrap; 
+        }
+    </style>
+</head>
+<body>
+    <div class="full-screen-text">Hello, World</div>
+</body>
+</html>
