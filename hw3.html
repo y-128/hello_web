@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotated Hello World</title>
+    <style>
+        /* 1. ページ全体（body）の設定 */
+        body {
+            /* 背景色を黒に設定 */
+            background-color: black;
+            /* 文字色を白に設定 */
+            color: white;
+            /* デフォルトのマージンをリセット */
+            margin: 0;
+            /* 画面全体の高さを使用 (100vh) */
+            height: 100vh;
+            /* 要素を中央に配置するためのFlexbox設定 */
+            display: flex;
+            justify-content: center; /* 水平方向の中央揃え */
+            align-items: center; /* 垂直方向の中央揃え */
+            /* フォントを指定（任意） */
+            font-family: 'Arial Black', sans-serif;
+            /* テキストを中央揃え */
+            text-align: center;
+            /* 画面幅に応じて文字サイズを調整 (画面幅の15%) */
+            font-size: 15vw; 
+            /* オーバーフローを非表示に */
+            overflow: hidden;
+        }
+
+        /* 2. テキスト要素の設定と回転 */
+        .full-screen-text {
+            /* 左右に少し余白を設ける */
+            padding: 0 5vw; 
+            /* CSSによる変形 (transform) を適用 */
+            transform: rotate(45deg); /* ここで文字を時計回りに45度回転させる */
+            /* アニメーションを適用する場合はこちらを使用 (任意) */
+            /* transition: transform 0.5s ease-in-out; */
+        }
+    </style>
+</head>
+<body>
+    <div class="full-screen-text">
+        Hello, World
+    </div>
+</body>
+</html>
