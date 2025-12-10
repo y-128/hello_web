@@ -46,3 +46,22 @@
     </div>
 </body>
 </html>
+        /* 2. テキスト要素の設定 (アニメーション追加のため、transformは削除) */
+        .full-screen-text {
+            padding: 0 5vw; 
+            /* アニメーション名、実行時間、速度、繰り返し回数を指定 */
+            animation: spin 10s linear infinite; /* 10秒かけて1周、線形に、無限に繰り返す */
+        }
+
+        /* 3. キーフレームアニメーションの定義 */
+        @keyframes spin {
+            /* アニメーション開始時 (0%) の設定 */
+            0% {
+                transform: rotate(0deg); /* 0度から開始 */
+            }
+            /* アニメーション終了時 (100%) の設定 */
+            100% {
+                transform: rotate(360deg); /* 360度 (1周) で終了 */
+            }
+        }
+
