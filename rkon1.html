@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Overlapping Glowing Falling Greetings</title>
+    <style>
+        /* 1. ページ全体の設定 */
+        body {
+            background-color: black;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; 
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            position: relative;
+        }
+
+        /* 2. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            position: absolute;
+            white-space: nowrap;
+            line-height: 1;
+            /* 残像効果のベース: ぼかしと初期透明度 */
+            filter: blur(1px); 
+            opacity: 0.8; 
+            
+            /* アニメーションを適用: 落下と色変化 */
+            animation: fall-down var(--duration) linear var(--delay) infinite,
+                       color-change var(--color-duration) linear infinite;
+        }
+
+        /* 3. 落下アニメーションの定義 */
+        @keyframes fall-down {
+            0% {
+                /* X軸はJSで設定。Y軸は画面外の上部から開始 */
+                transform: translate(0, -10vh); 
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.9; 
+            }
+            100% {
+                /* 画面の下端（100vh）よりさらに下へ移動 */
+                transform: translate(0, 110vh); 
+                opacity: 0;
+            }
+        }
+
+        /* 4. 色変化アニメーションの定義 (HSLで連続的な変化) */
+        @keyframes color-change {
+            0% { color: hsl(0, 100%, 70%); text-shadow: 0 0 5px hsl(0, 100%, 50%), 0 0 10px hsl(0, 100%, 60%); }
+            20% { color: hsl(60, 100%, 70%); text-shadow: 0 0 5px hsl(60, 100%, 50%), 0 0 10px hsl(60, 100%, 60%); }
+            40% { color: hsl(120, 100%, 70%); text-shadow: 0 0 5px hsl(120, 100%, 50%), 0 0 10px hsl(120, 100%, 60%); }
+            60% { color: hsl(240, 100%, 70%); text-shadow: 0 0 5px hsl(240, 100%, 50%), 0 0 10px hsl(240, 100%, 60%); }
+            80% { color: hsl(300, 100%, 70%); text-shadow: 0 0 5px hsl(300, 100%, 50%), 0 0 10px hsl(300, 100%, 60%); }
+            100% { color: hsl(360, 100%, 70%); text-shadow: 0 0 5px hsl(360, 100%, 50%), 0 0 10px hsl(360, 100%, 60%); }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const LANGUAGES = [
+            "こんにちは", "Hello", "Hola", "你好", "Bonjour", 
+            "안녕하세요", "Guten Tag", "Ciao", "Olá", "Здравствуйте",
+            "مرحبا", "Goddag", "Dobrý den", "Selamat siang", "Xin chào", 
+            "Hujambo", "Shalom", "Kaliméra"
+        ];
+        
+        const NUM_WORDS = 50;   // 同時に存在する文字の総数
+        const MAX_SIZE_VW = 6;  // 最大フォントサイズ (vw)
+        const MIN_SIZE_VW = 2;  // 最小フォントサイズ (vw)
+        const MAX_DURATION = 15; // 最大落下時間 (s)
+        const MIN_DURATION = 8;  // 最小落下時間 (s)
+        const COLOR_ANIMATION_DURATION = 10; // 色変化アニメーションの周期 (s)
+        const COL_GRID = 10; // 水平方向のグリッド分割数 (重なり回避用)
+        const ROW_GRID = 5;  // 垂直方向の初期グリッド分割数 (重なり回避用)
+
+        /**
+         * 最小値と最大値の間の乱数を取得する関数
+         */
+        function getRandomNumber(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        // 初期生成位置を記録するためのグリッドシステムを準備
+        // この配列が、文字の初期生成位置を均等に分散させるキーとなります。
+        let initialPositions = [];
+        for (let r = 0; r < ROW_GRID; r++) {
+            for (let c = 0; c < COL_GRID; c++) {
+                initialPositions.push({ row: r, col: c });
+            }
+        }
+        
+        // グリッドをランダムにシャッフル
+        initialPositions.sort(() => Math.random() - 0.5);
+
+        /**
+         * 文字要素を生成し、ランダムなスタイルとアニメーションを適用する関数
+         */
+        function createFallingWord(i) {
+            const word = document.createElement('div');
+            word.textContent = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)];
+            word.classList.add('greeting-unit');
+
+            // 1. サイズ (vw) をランダムに設定
+            const fontSize = getRandomNumber(MIN_SIZE_VW, MAX_SIZE_VW);
+            word.style.fontSize = `${fontSize}vw`;
+
+            // 2. グリッドシステムに基づいた初期位置の計算 (重なり回避)
+            // 割り当てられたグリッド位置を取得
+            const pos = initialPositions[i % initialPositions.length];
+            const colIndex = pos.col;
+            const rowIndex = pos.row;
+
+            // グリッドの幅と高さ
+            const colWidth = 100 / COL_GRID;
+            const rowHeight = MAX_DURATION / ROW_GRID; // 落下時間を分割
+
+            // グリッド内でのランダムな位置に配置
+            const leftPosition = getRandomNumber(colIndex * colWidth, (colIndex + 1) * colWidth);
+            word.style.left = `${leftPosition}vw`;
+
+            // 3. 落下アニメーション時間 (速さ) と開始遅延の計算
+            const duration = getRandomNumber(MIN_DURATION, MAX_DURATION);
+            word.style.setProperty('--duration', `${duration}s`);
+            
+            // 垂直グリッドに基づいて遅延時間を設定し、文字が縦に重ならないようにする
+            const delay = getRandomNumber(0, rowHeight) + (rowIndex * rowHeight);
+            word.style.setProperty('--delay', `${delay}s`);
+
+            // 4. 色変化アニメーションの開始遅延と周期を設定
+            const colorDelay = getRandomNumber(0, COLOR_ANIMATION_DURATION);
+            word.style.animationDelay = `${delay}s, ${colorDelay}s`; 
+            word.style.setProperty('--color-duration', `${COLOR_ANIMATION_DURATION}s`);
+
+            // 5. Z軸の奥行き（大きい文字を前面に）
+            word.style.zIndex = Math.round(fontSize * 10);
+
+            document.body.appendChild(word);
+            
+            // 6. X軸の微動（有機的な動きの追加）
+            const randomXOffset = getRandomNumber(-100, 100); 
+            word.style.transform = `translateX(${randomXOffset}px)`;
+        }
+
+        // 指定した数の文字を生成
+        for (let i = 0; i < NUM_WORDS; i++) {
+            createFallingWord(i);
+        }
+
+    </script>
+</body>
+</html>
