@@ -21,34 +21,22 @@
             white-space: nowrap;
             line-height: 1;
             filter: blur(1px); 
-            
-            /* 初期透明度を設定。アニメーションが開始するまでは完全に透明（生成時） */
-            opacity: 0; 
+            opacity: 0; /* 生成時透明 */
             
             /* アニメーションを適用: 落下、色変化 */
             animation: fall-down var(--duration) linear var(--delay) infinite,
                        color-change var(--color-duration) linear infinite;
         }
 
-        /* 3. 落下アニメーションの定義 (透明度の調整) */
+        /* 3. 落下アニメーションの定義 */
         @keyframes fall-down {
-            0% { 
-                transform: translate(0, -10vh); 
-                opacity: 0; /* 画面外では透明 */
-            }
-            1% {
-                /* 落下開始直前（1%の時点）で不透明度を上げる */
-                opacity: 0.9; 
-            }
-            100% { 
-                transform: translate(0, 110vh); 
-                opacity: 0; /* 画面外に出る直前で再び透明に */
-            }
+            0% { transform: translate(0, -10vh); opacity: 0; }
+            1% { opacity: 0.9; } /* 落下開始直前で不透明に */
+            100% { transform: translate(0, 110vh); opacity: 0; }
         }
 
-        /* 4. 色変化アニメーションの定義 (変更なし) */
+        /* 4. 色変化アニメーションの定義 */
         @keyframes color-change {
-            /* HSLで連続的な変化と残像（text-shadow） */
             0% { color: hsl(0, 100%, 70%); text-shadow: 0 0 5px hsl(0, 100%, 50%), 0 0 10px hsl(0, 100%, 60%); }
             20% { color: hsl(60, 100%, 70%); text-shadow: 0 0 5px hsl(60, 100%, 50%), 0 0 10px hsl(60, 100%, 60%); }
             40% { color: hsl(120, 100%, 70%); text-shadow: 0 0 5px hsl(120, 100%, 50%), 0 0 10px hsl(120, 100%, 60%); }
@@ -75,6 +63,7 @@
         const COLOR_ANIMATION_DURATION = 10; 
         const COL_GRID = 10; 
         const ROW_GRID = 5;  
+        let zIndexCounter = NUM_WORDS; // Z-Indexの初期値を要素総数に設定
 
         function getRandomNumber(min, max) {
             return Math.random() * (max - min) + min;
@@ -121,11 +110,11 @@
             // 4. 色変化アニメーションの開始遅延と周期を設定
             const colorDelay = getRandomNumber(0, COLOR_ANIMATION_DURATION);
             word.style.setProperty('--color-duration', `${COLOR_ANIMATION_DURATION}s`);
-            // fall-down, color-change の順に遅延を設定
             word.style.animationDelay = `${delay}s, ${colorDelay}s`; 
 
-            // 5. Z軸の奥行き
-            word.style.zIndex = Math.round(fontSize * 10);
+            // 5. ★Z軸の順序制御: 後から生成されたものほどZ値を小さくする（後面に）★
+            word.style.zIndex = zIndexCounter; 
+            zIndexCounter--; // カウンターをデクリメント
 
             document.body.appendChild(word);
             
@@ -138,7 +127,7 @@
         for (let i = 0; i < NUM_WORDS; i++) {
             createFallingWord(i);
         }
-
+/* Coded by Gemini */
     </script>
 </body>
 </html>
