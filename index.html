@@ -1,9 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delayed Color Reveal Falling Greetings</title>
+    <style>
+        /* 1. ページ全体の設定 */
+        body {
+            background-color: black;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; 
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            position: relative;
+        }
+
+        /* 2. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            position: absolute;
+            white-space: nowrap;
+            line-height: 1;
+            filter: blur(1px); 
+            opacity: 0.8; 
+            
+            /* アニメーションを適用: 落下、色変化、★色フェードアウト★ */
+            animation: fall-down var(--duration) linear var(--delay) infinite,
+                       color-change var(--color-duration) linear infinite,
+                       color-fade 2s steps(1) var(--delay) forwards; /* ★新しいアニメーション★ */
+        }
+
+        /* 3. 落下アニメーションの定義 (変更なし) */
+        @keyframes fall-down {
+            0% { transform: translate(0, -10vh); opacity: 0; }
+            5% { opacity: 0.9; }
+            100% { transform: translate(0, 110vh); opacity: 0; }
+        }
+
+        /* 4. 色変化アニメーションの定義 (ランダムな色変化) */
+        @keyframes color-change {
+            /* HSLで連続的な変化 */
+            0% { color: hsl(0, 100%, 70%); text-shadow: 0 0 5px hsl(0, 100%, 50%), 0 0 10px hsl(0, 100%, 60%); }
+            20% { color: hsl(60, 100%, 70%); text-shadow: 0 0 5px hsl(60, 100%, 50%), 0 0 10px hsl(60, 100%, 60%); }
+            40% { color: hsl(120, 100%, 70%); text-shadow: 0 0 5px hsl(120, 100%, 50%), 0 0 10px hsl(120, 100%, 60%); }
+            60% { color: hsl(240, 100%, 70%); text-shadow: 0 0 5px hsl(240, 100%, 50%), 0 0 10px hsl(240, 100%, 60%); }
+            80% { color: hsl(300, 100%, 70%); text-shadow: 0 0 5px hsl(300, 100%, 50%), 0 0 10px hsl(300, 100%, 60%); }
+            100% { color: hsl(360, 100%, 70%); text-shadow: 0 0 5px hsl(360, 100%, 50%), 0 0 10px hsl(360, 100%, 60%); }
+        }
+        
+        /* 5. ★最初の2秒間だけ黒色にするアニメーション★ */
+        @keyframes color-fade {
+            0% { 
+                color: black !important; 
+                text-shadow: none !important; 
+                opacity: 0.01 !important; /* 僅かに透明度を下げる */
+            }
+            100% { 
+                color: transparent !important; /* アニメーション終了時に透明にする */
+                text-shadow: none !important; 
+            }
+        }
+        
+        /* color-fadeアニメーションが終了した後のスタイルを上書き */
+        /* opacityがcolor-fadeによって0.01に設定されたままにならないように、
+           アニメーション終了後の状態をリセットする。*/
+        .greeting-unit {
+            /* color-fadeの実行が終わった後、通常のcolor-changeアニメーションが効くように設定 */
+            animation-name: fall-down, color-change, color-fade;
+            animation-duration: var(--duration), var(--color-duration), 2s;
+            animation-delay: var(--delay), var(--color-delay), var(--delay);
+            animation-timing-function: linear, linear, steps(1);
+            animation-iteration-count: infinite, infinite, 1; /* color-fadeは1回実行 */
+            animation-fill-mode: forwards, none, forwards;
+        }
+
+    </style>
 </head>
 <body>
-  <p style="color: orange">Hello, World!!!!</p>
+    <script>
+        const LANGUAGES = [
+            "こんにちは", "Hello", "Hola", "你好", "Bonjour", 
+            "안녕하세요", "Guten Tag", "Ciao", "Olá", "Здравствуйте",
+            "مرحبا", "Goddag", "Dobrý den", "Selamat siang", "Xin chào", 
+            "Hujambo", "Shalom", "Kaliméra"
+        ];
+        
+        const NUM_WORDS = 50;   
+        const MAX_SIZE_VW = 6;  
+        const MIN_SIZE_VW = 2;  
+        const MAX_DURATION = 15; 
+        const MIN_DURATION = 8;  
+        const COLOR_ANIMATION_DURATION = 10; 
+        const COL_GRID = 10; 
+        const ROW_GRID = 5;  
+        
+        // (省略): getRandomNumber関数は変更なし
+
+        function getRandomNumber(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        let initialPositions = [];
+        for (let r = 0; r < ROW_GRID; r++) {
+            for (let c = 0; c < COL_GRID; c++) {
+                initialPositions.push({ row: r, col: c });
+            }
+        }
+        initialPositions.sort(() => Math.random() - 0.5);
+
+        /**
+         * 文字要素を生成し、ランダムなスタイルとアニメーションを適用する関数
+         */
+        function createFallingWord(i) {
+            const word = document.createElement('div');
+            word.textContent = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)];
+            word.classList.add('greeting-unit');
+
+            // 1. サイズ
+            const fontSize = getRandomNumber(MIN_SIZE_VW, MAX_SIZE_VW);
+            word.style.fontSize = `${fontSize}vw`;
+
+            // 2. グリッドシステムに基づいた初期位置の計算 (重なり回避)
+            const pos = initialPositions[i % initialPositions.length];
+            const colIndex = pos.col;
+            const rowIndex = pos.row;
+
+            const colWidth = 100 / COL_GRID;
+            const rowHeight = MAX_DURATION / ROW_GRID;
+
+            const leftPosition = getRandomNumber(colIndex * colWidth, (colIndex + 1) * colWidth);
+            word.style.left = `${leftPosition}vw`;
+
+            // 3. 落下アニメーション時間 (速さ) と開始遅延の計算
+            const duration = getRandomNumber(MIN_DURATION, MAX_DURATION);
+            word.style.setProperty('--duration', `${duration}s`);
+            
+            const delay = getRandomNumber(0, rowHeight) + (rowIndex * rowHeight);
+            word.style.setProperty('--delay', `${delay}s`);
+
+            // 4. 色変化アニメーションの開始遅延と周期を設定
+            const colorDelay = getRandomNumber(0, COLOR_ANIMATION_DURATION);
+            word.style.setProperty('--color-duration', `${COLOR_ANIMATION_DURATION}s`);
+            // fall-down, color-change, color-fade の順に遅延を設定
+            word.style.animationDelay = `${delay}s, ${colorDelay}s, ${delay}s`; 
+
+            // 5. Z軸の奥行き
+            word.style.zIndex = Math.round(fontSize * 10);
+
+            document.body.appendChild(word);
+            
+            // 6. X軸の微動
+            const randomXOffset = getRandomNumber(-100, 100); 
+            word.style.transform = `translateX(${randomXOffset}px)`;
+        }
+
+        // 指定した数の文字を生成
+        for (let i = 0; i < NUM_WORDS; i++) {
+            createFallingWord(i);
+        }
+
+    </script>
 </body>
 </html>
