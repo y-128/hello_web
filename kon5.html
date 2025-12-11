@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Varied Sized Multi-Language Greetings</title>
+    <style>
+        /* 1. ページ全体（body）の設定 */
+        body {
+            /* 背景色を黒、文字色を白に設定 */
+            background-color: black;
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            
+            /* Flexboxで配置を制御 */
+            display: flex;
+            flex-wrap: wrap; /* 要素を折り返す */
+            justify-content: center; /* 水平方向の中央揃え */
+            align-items: center; /* 垂直方向の中央揃え */
+            text-align: center;
+        }
+
+        /* 2. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            flex: 0 0 auto;
+            white-space: nowrap; 
+            /* パディングは前回と同じ広めの設定を維持 */
+            padding: 8px 15px; 
+            line-height: 1; 
+            text-rendering: optimizeLegibility;
+        }
+
+        /* 3. サイズごとの文字の設定（vwで画面幅に応じたサイズを指定） */
+
+        /* 最大サイズ (画面いっぱいに近い) */
+        .size-extra-large {
+            font-size: 10vw; /* 非常に大きく */
+            opacity: 0.85; 
+        }
+
+        /* 大きいサイズ */
+        .size-large {
+            font-size: 6vw; /* 前回均一だったサイズ */
+            opacity: 1.0; 
+        }
+
+        /* 中程度のサイズ */
+        .size-medium {
+            font-size: 4vw;
+            opacity: 0.7;
+        }
+
+        /* 小さいサイズ */
+        .size-small {
+            font-size: 2.5vw;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="greeting-unit size-extra-large">こんにちは</div>
+    <div class="greeting-unit size-medium">Hello</div>
+    <div class="greeting-unit size-large">Hola</div>
+    <div class="greeting-unit size-small">你好</div>
+    <div class="greeting-unit size-large">Bonjour</div>
+    <div class="greeting-unit size-extra-large">안녕하세요</div>
+    <div class="greeting-unit size-medium">Guten Tag</div>
+    <div class="greeting-unit size-small">Ciao</div>
+    <div class="greeting-unit size-large">Olá</div>
+    <div class="greeting-unit size-medium">Здравствуйте</div>
+    
+    <div class="greeting-unit size-extra-large">مرحبا</div>
+    <div class="greeting-unit size-small">Goddag</div>
+    <div class="greeting-unit size-large">Dobrý den</div>
+    <div class="greeting-unit size-medium">Selamat siang</div>
+    <div class="greeting-unit size-extra-large">Xin chào</div>
+    <div class="greeting-unit size-small">Hujambo</div>
+    <div class="greeting-unit size-large">Shalom</div>
+    <div class="greeting-unit size-medium">Kaliméra</div>
+
+    <div class="greeting-unit size-small">こんにちは</div>
+    <div class="greeting-unit size-large">Hola</div>
+    <div class="greeting-unit size-medium">Bonjour</div>
+    <div class="greeting-unit size-extra-large">Guten Tag</div>
+    <div class="greeting-unit size-small">Shalom</div>
+    <div class="greeting-unit size-large">Здравствуйте</div>
+    
+</body>
+</html>
