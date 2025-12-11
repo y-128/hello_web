@@ -3,168 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Falling Greetings with Controlled Rotation</title>
+    <title>Falling Greetings</title>
     <style>
-        /* 1. ページ全体の設定 */
+        /* * CSS: スタイル定義 
+         */
         body {
-            background-color: black;
             margin: 0;
+            overflow: hidden; /* 画面外の要素を隠す */
             height: 100vh;
-            overflow: hidden; 
-            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
-            position: relative;
+            width: 100vw;
+            /* 背景画像の設定はJavaScriptで行います */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 1s ease-in-out; /* 画像切り替え時の滑らかさ */
         }
 
-        /* 2. 各テキスト要素の共通設定 */
-        .greeting-unit {
+        .konnichiwa-text {
             position: absolute;
             white-space: nowrap;
-            line-height: 1;
-            filter: blur(1px); 
-            opacity: 0; /* 生成時透明 */
-            
-            /* アニメーションを適用: 落下、色変化 */
-            animation: fall-down var(--duration) linear var(--delay) infinite,
-                       color-change var(--color-duration) linear infinite;
-            
-            /* 初期回転角度を設定（JSで上書き） */
-            transform-origin: center center;
-            transform: rotate(var(--rotation));
+            /* 初期位置は画面外の上部 */
+            top: -100px; 
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* 文字の残像（少しぼかし） */
+            transition: opacity 1s linear; /* 透明度のアニメーション用 */
+            will-change: transform, color, opacity; /* パフォーマンス向上 */
+            pointer-events: none; /* マウスイベントを無視し、下の要素にクリックが通るように */
         }
 
-        /* 3. 落下アニメーションの定義 */
-        @keyframes fall-down {
-            0% { transform: translate(0, -10vh) rotate(var(--rotation)); opacity: 0; }
-            1% { opacity: 0.9; } /* 落下開始直前で不透明に */
-            100% { 
-                /* 落下中も回転を維持 */
-                transform: translate(0, 110vh) rotate(var(--rotation)); 
-                opacity: 0; 
+        /* 落下アニメーションのキーフレーム */
+        @keyframes fall {
+            from {
+                transform: translateY(0);
             }
-        }
-
-        /* 4. 色変化アニメーションの定義 */
-        @keyframes color-change {
-            0% { color: hsl(0, 100%, 70%); text-shadow: 0 0 5px hsl(0, 100%, 50%), 0 0 10px hsl(0, 100%, 60%); }
-            20% { color: hsl(60, 100%, 70%); text-shadow: 0 0 5px hsl(60, 100%, 50%), 0 0 10px hsl(60, 100%, 60%); }
-            40% { color: hsl(120, 100%, 70%); text-shadow: 0 0 5px hsl(120, 100%, 50%), 0 0 10px hsl(120, 100%, 60%); }
-            60% { color: hsl(240, 100%, 70%); text-shadow: 0 0 5px hsl(240, 100%, 50%), 0 0 10px hsl(240, 100%, 60%); }
-            80% { color: hsl(300, 100%, 70%); text-shadow: 0 0 5px hsl(300, 100%, 50%), 0 0 10px hsl(300, 100%, 60%); }
-            100% { color: hsl(360, 100%, 70%); text-shadow: 0 0 5px hsl(360, 100%, 50%), 0 0 10px hsl(360, 100%, 60%); }
+            to {
+                /* 画面の高さに応じて調整。ここでは150vhで画面外まで落とす */
+                transform: translateY(150vh); 
+            }
         }
     </style>
 </head>
 <body>
     <script>
-        const LANGUAGES = [
-            "こんにちは", "Hello", "Hola", "你好", "Bonjour", 
-            "안녕하세요", "Guten Tag", "Ciao", "Olá", "Здравствуйте",
-            "مرحبا", "Goddag", "Dobrý den", "Selamat siang", "Xin chào", 
-            "Hujambo", "Shalom", "Kaliméra"
+        // 
+        // JavaScript: アニメーションとロジック 
+        //
+
+        // --- 1. 設定項目 ---
+        
+        // 🚨 画像URLの入力箇所 🚨
+        const BACKGROUND_IMAGES = [
+            "https://picsum.photos/1920/1080?random=1", // 1枚目の画像URL
+            "https://picsum.photos/1920/1080?random=2"  // 2枚目の画像URL
         ];
         
-        const NUM_WORDS = 50;   
-        const MAX_SIZE_VW = 6;  
-        const MIN_SIZE_VW = 2;  
-        const MAX_DURATION = 15; 
-        const MIN_DURATION = 8;  
-        const COLOR_ANIMATION_DURATION = 10; 
-        const COL_GRID = 10; 
-        const ROW_GRID = 5;  
-        let zIndexCounter = NUM_WORDS; // Z-Indexの初期値 (後から生成されたものほど後面に)
+        const TEXTS = {
+            ja: "こんにちは",
+            en: "Hello",
+            fr: "Bonjour",
+            es: "Hola",
+            de: "Hallo"
+        };
+        const MIN_SIZE = 20;
+        const MAX_SIZE = 80;
+        const INTERVAL_MS = 300; // テキスト生成間隔 (ミリ秒)
+        const DURATION_S_MIN = 8; // 落下速度 (秒)
+        const DURATION_S_MAX = 15;
+        const Z_INDEX_START = 1000; // z-indexの初期値
+        
+        // --- 2. ユーティリティ関数 ---
 
-        function getRandomNumber(min, max) {
+        /**
+         * 乱数生成（指定範囲内）
+         * @param {number} min 
+         * @param {number} max 
+         */
+        function getRandom(min, max) {
             return Math.random() * (max - min) + min;
         }
-// --- 確率制御のための関数 ---
-        /**
-         * 指定された確率に基づいてランダムな回転角度を取得する関数
-         * 0度(40%)、40度(40%)、90度(20%)、-90度(5%)、残りはランダム(35%)
-         */
-        function getRandomRotation() {
-            const rand = Math.random(); // 0から1の乱数
-            let rotation = 0;
 
-            if (rand < 0.40) {
-                // 40% の確率で 0度
-                rotation = 0;
-            } else if (rand < 0.40 + 0.20) {
-                // 20% の確率で 90度
-                rotation = 90;
-            } else if (rand < 0.40 + 0.20 + 0.05) {
-                // 5% の確率で -90度
-                rotation = -90;
+        /**
+         * ランダムなHEXカラーを生成（緑色が主体ではないように配慮）
+         * 明るい色を優先し、背景の緑と対比させる
+         * @returns {string} HSLカラー文字列
+         */
+        function getRandomColor(saturation = 80, lightness = 70) {
+            const hue = getRandom(0, 360); // 任意の色相
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+        
+        /**
+         * 回転角度を決定する
+         * - 0度: 50%
+         * - 90度: 20%
+         * - -90度: 10%
+         * - その他: 20% (ランダム)
+         * @returns {number} 角度（deg）
+         */
+        function getRotationAngle() {
+            const rand = Math.random();
+            if (rand < 0.50) {
+                return 0; // 50%
+            } else if (rand < 0.70) {
+                return 90; // 20%
+            } else if (rand < 0.80) {
+                return -90; // 10%
             } else {
-                // 残り (35%) の確率で -360度から360度の間のランダムな角度
-                rotation = getRandomNumber(-360, 360);
+                return getRandom(-180, 180); // 残りの20%はランダム
             }
-            return rotation;
         }
-// ----------------------------
 
-        let initialPositions = [];
-        for (let r = 0; r < ROW_GRID; r++) {
-            for (let c = 0; c < COL_GRID; c++) {
-                initialPositions.push({ row: r, col: c });
-            }
+        // --- 3. 背景画像の設定 ---
+
+        function setRandomBackground() {
+            const randomIndex = Math.floor(getRandom(0, BACKGROUND_IMAGES.length));
+            const selectedImage = BACKGROUND_IMAGES[randomIndex];
+            document.body.style.backgroundImage = `url('${selectedImage}')`;
         }
-        initialPositions.sort(() => Math.random() - 0.5);
+
+        // 接続時に一度だけ背景画像を設定
+        setRandomBackground();
+
+        // --- 4. テキスト生成とアニメーション ---
+        
+        let zIndexCounter = Z_INDEX_START;
+        const activeTextElements = new Set(); // 画面上に表示中の要素を管理
+        const MIN_DISTANCE_PX = 80; // テキスト間の最小距離（重なり防止用）
 
         /**
-         * 文字要素を生成し、ランダムなスタイルとアニメーションを適用する関数
+         * 新しい「こんにちは」テキスト要素を生成し、落下アニメーションを開始する
          */
-        function createFallingWord(i) {
-            const word = document.createElement('div');
-            word.textContent = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)];
-            word.classList.add('greeting-unit');
-
-            // 1. サイズ
-            const fontSize = getRandomNumber(MIN_SIZE_VW, MAX_SIZE_VW);
-            word.style.fontSize = `${fontSize}vw`;
-
-            // 2. グリッドシステムに基づいた初期位置の計算 (重なり回避)
-            const pos = initialPositions[i % initialPositions.length];
-            const colIndex = pos.col;
-            const rowIndex = pos.row;
-
-            const colWidth = 100 / COL_GRID;
-            const rowHeight = MAX_DURATION / ROW_GRID;
-
-            const leftPosition = getRandomNumber(colIndex * colWidth, (colIndex + 1) * colWidth);
-            word.style.left = `${leftPosition}vw`;
-
-            // 3. 落下アニメーション時間 (速さ) と開始遅延の計算
-            const duration = getRandomNumber(MIN_DURATION, MAX_DURATION);
-            word.style.setProperty('--duration', `${duration}s`);
+        function createKonnichiwa() {
+            // テキスト要素を作成
+            const textElement = document.createElement('div');
+            const langKeys = Object.keys(TEXTS);
+            const randomLang = langKeys[Math.floor(getRandom(0, langKeys.length))];
+            textElement.textContent = TEXTS[randomLang];
             
-            const delay = getRandomNumber(0, rowHeight) + (rowIndex * rowHeight);
-            word.style.setProperty('--delay', `${delay}s`);
-
-            // 4. 色変化アニメーションの開始遅延と周期を設定
-            const colorDelay = getRandomNumber(0, COLOR_ANIMATION_DURATION);
-            word.style.setProperty('--color-duration', `${COLOR_ANIMATION_DURATION}s`);
-            word.style.animationDelay = `${delay}s, ${colorDelay}s`; 
-
-            // 5. Z軸の順序制御
-            word.style.zIndex = zIndexCounter; 
-            zIndexCounter--; 
-
-            // 6. ★文字の向き (回転) を確率に基づいて設定★
-            const rotation = getRandomRotation(); 
-            word.style.setProperty('--rotation', `${rotation}deg`);
-
-            document.body.appendChild(word);
+            // スタイルを設定
+            const fontSize = getRandom(MIN_SIZE, MAX_SIZE);
+            const rotation = getRotationAngle();
+            const duration = getRandom(DURATION_S_MIN, DURATION_S_MAX);
             
-            // 7. X軸の微動
-            const randomXOffset = getRandomNumber(-100, 100); 
-            word.style.transform += ` translateX(${randomXOffset}px)`;
-        }
+            textElement.className = 'konnichiwa-text';
+            textElement.style.fontSize = `${fontSize}px`;
+            textElement.style.zIndex = zIndexCounter++; // 後から生成されたものを前面に
+            
+            // 落下アニメーションを設定
+            textElement.style.animation = `fall ${duration}s linear forwards`;
+            textElement.style.transform = `rotate(${rotation}deg)`;
+            
+            // 落下開始X座標を決定 (重なり防止ロジック)
+            const viewportWidth = window.innerWidth;
+            let startX = 0;
+            let maxAttempts = 50;
 
-        // 指定した数の文字を生成
-        for (let i = 0; i < NUM_WORDS; i++) {
-            createFallingWord(i);
-        }
+            // X座標を決定するロジック (重なり防止)
+            // 既存の要素と中心が一定距離以上離れるように試行
+            while (maxAttempts-- > 0) {
+                // 画面の幅の範囲内でランダムなX座標
+                startX = getRandom(0, viewportWidth - fontSize); 
+                let isOverlapping = false;
 
+                for (const activeElement of activeTextElements) {
+                    // 落下開始位置はY座標が画面外で同じなのでX座標のみをチェック
+                    const activeX = parseFloat(activeElement.getAttribute('data-x'));
+                    const distance = Math.abs(startX - activeX);
+                    
+                    // フォントサイズも考慮して重なりを判定
+                    const requiredDistance = (fontSize + parseFloat(activeElement.style.fontSize)) / 2 + MIN_DISTANCE_PX;
+
+                    if (distance < requiredDistance) {
+                        isOverlapping = true;
+                        break;
+                    }
+                }
+
+                if (!isOverlapping) {
+                    break; // 重なっていない位置が見つかった
+                }
+
+                if (maxAttempts === 0) {
+                   // 試行回数を超えた場合は、そのまま配置して諦める (稀に重なる可能性あり)
+                   break;
+                }
+            }
+            
+            textElement.style.left = `${startX}px`;
+            textElement.setAttribute('data-x', startX); // 重なり判定用にX座標を保存
+            
+            document.body.appendChild(textElement);
+            activeTextElements.add(textElement);
+
+            // 連続的な色の変更
+            let colorInterval = setInterval(() => {
+                textElement.style.color = getRandomColor();
+            }, 500); // 0.5秒ごとに色を変更
+
+            // アニメーション終了時の処理 (画面外に出た/寿命が尽きた)
+            textElement.addEventListener('animationend', () => {
+                // 残像を残すため、アニメーション終了後に透明度を下げていく
+                clearInterval(colorInterval);
+                textElement.style.opacity = '0';
+                
+                // 透明度が下がり切った後に要素を完全に削除
+                setTimeout(() => {
+                    textElement.remove();
+                    activeTextElements.delete(textElement);
+                }, 1000); // 1秒後に完全に削除
+            });
+        }
+        
+        // --- 5. メインループ ---
+        
+        // 定期的に新しいテキストを生成
+        setInterval(createKonnichiwa, INTERVAL_MS);
+        
     </script>
     // coded by Gemini
 </body>
