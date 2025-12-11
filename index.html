@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
-          /* coded by Gemini */ 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falling Greetings</title>
+    <title>こんにちはアニメーション</title>
     <style>
         /* * CSS: スタイル定義 
          */
@@ -46,7 +45,7 @@
 </head>
 <body>
     <script>
-        // 
+        // Coded by A 
         // JavaScript: アニメーションとロジック 
         //
 
@@ -65,8 +64,8 @@
             es: "Hola",
             de: "Hallo"
         };
-        const MIN_SIZE = 20;
-        const MAX_SIZE = 80;
+        const MIN_SIZE = 30; // 最小文字サイズを30に変更
+        const MAX_SIZE = 100; // 最大文字サイズを100に変更
         const INTERVAL_MS = 300; // テキスト生成間隔 (ミリ秒)
         const DURATION_S_MIN = 8; // 落下速度 (秒)
         const DURATION_S_MAX = 15;
@@ -218,8 +217,8 @@
         // --- 5. メインループ ---
         
         // 定期的に新しいテキストを生成
-        setInterval(createKonnichiwa, INTERVAL_MS);    
-    
+        setInterval(createKonnichiwa, INTERVAL_MS);
+        
     </script>
 </body>
 </html>
