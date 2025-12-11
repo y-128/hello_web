@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Sized Hello World</title>
+    <style>
+        /* 1. ページ全体（body）の設定 */
+        body {
+            /* 背景色を黒に設定 */
+            background-color: black;
+            /* 文字色を白に設定 */
+            color: white;
+            /* デフォルトのマージンとパディングをリセット */
+            margin: 0;
+            padding: 0;
+            /* 画面全体の高さを使用 (100vh) */
+            min-height: 100vh;
+            /* フォントを指定 */
+            font-family: 'Arial Black', sans-serif;
+            /* Flexboxを使用し、要素を折り返して配置できるようにする */
+            display: flex;
+            flex-wrap: wrap; /* 要素を折り返す */
+            justify-content: center; /* 水平方向の中央揃え */
+            align-items: flex-start; /* 垂直方向は上から配置開始 */
+            /* 全体のテキストを中央揃えに */
+            text-align: center;
+        }
+
+        /* 2. 各テキスト要素の設定 */
+        .text-unit {
+            /* Flexアイテムとして扱えるように設定 */
+            flex: 0 0 auto;
+            /* 行の途中で改行されないように nowrap に設定 */
+            white-space: nowrap; 
+            /* 各要素の上下左右に少し余白を持たせる（配置を分かりやすくするため） */
+            padding: 10px 20px;
+            /* 文字の境界がぼやけるのを防ぐ (任意) */
+            text-rendering: optimizeLegibility;
+        }
+
+        /* 3. サイズごとの文字の設定（vwで画面幅に応じたサイズを指定） */
+
+        /* 最大サイズ (非常に大きく) */
+        .size-extra-large {
+            font-size: 20vw;
+            opacity: 0.8; /* わずかに透明度を持たせる */
+        }
+
+        /* 大サイズ */
+        .size-large {
+            font-size: 10vw;
+            opacity: 1; 
+        }
+
+        /* 中サイズ */
+        .size-medium {
+            font-size: 5vw;
+            opacity: 0.7;
+        }
+
+        /* 小サイズ */
+        .size-small {
+            font-size: 2vw;
+            opacity: 0.9;
+        }
+
+        /* 非常に小さいサイズ */
+        .size-extra-small {
+            font-size: 1vw;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-unit size-extra-large">Hello, World</div>
+    <div class="text-unit size-medium">Hello, World</div>
+    <div class="text-unit size-large">Hello, World</div>
+    <div class="text-unit size-small">Hello, World</div>
+    <div class="text-unit size-extra-large">Hello, World</div>
+    <div class="text-unit size-medium">Hello, World</div>
+    <div class="text-unit size-small">Hello, World</div>
+    <div class="text-unit size-large">Hello, World</div>
+    <div class="text-unit size-medium">Hello, World</div>
+    <div class="text-unit size-extra-small">Hello, World</div>
+    </body>
+</html>
