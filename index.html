@@ -15,7 +15,8 @@
             width: 100vw;
             background-size: cover;
             background-position: center;
-            transition: background-image 0.5s ease-in-out; /* 背景画像切り替え時のトランジション */
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out; 
             position: relative;
         }
 
@@ -24,36 +25,34 @@
             white-space: nowrap; /* テキストが折り返されないように */
             font-family: 'Arial', sans-serif;
             font-weight: bold;
-            line-height: 1; /* 行の高さを設定 */
-            pointer-events: none; /* クリック不可に */
-            /* 残像効果: text-shadowを多層にすることで残像のように見せる */
+            line-height: 1; 
+            pointer-events: none; 
+            
+            /* 残像効果: text-shadowを多層にして残像のように見せる */
             text-shadow: 
                 0 0 1px rgba(0, 0, 0, 0.2),
                 0 0 3px rgba(0, 0, 0, 0.1),
-                0 0 5px rgba(0, 0, 0, 0.05); 
-            transition: color 0.5s linear, opacity 0.5s linear; /* 色と透明度の変化を滑らかに */
-            z-index: 100; /* 初期値 */
+                0 0 5px rgba(0, 0, 0, 0.05),
+                0 0 10px rgba(0, 0, 0, 0.03); 
+                
+            transition: color 0.5s linear, opacity 0.5s linear;
+            z-index: 1000; /* 初期値（JSで動的に変更されます） */
             opacity: 1;
+            
             /* 落下アニメーションの定義 */
-            animation: fall 10s linear forwards; 
+            animation: fall var(--duration) linear forwards; /* 落下時間をJSから取得 */
         }
 
         @keyframes fall {
             from {
-                transform: translateY(-100px) rotate(var(--initial-rotation, 0deg)); /* 画面外から開始 */
+                /* transform: translateY(-100px) rotate(var(--initial-rotation, 0deg)); */
+                /* 落下開始時は画面外の上部に配置 */
+                transform: translate(0, -100px) rotate(var(--initial-rotation, 0deg));
             }
             to {
-                transform: translateY(calc(100vh + 100px)) rotate(var(--final-rotation, 0deg)); /* 画面下まで落下 */
+                /* 画面下まで落下し、さらにランダムな回転を伴う */
+                transform: translate(0, calc(100vh + 100px)) rotate(var(--final-rotation, 0deg)); 
                 opacity: 0; /* 落下し終わったら消える */
-            }
-        }
-
-        /* レスポンシブデザインのヒント (JSでサイズ制御するためCSSは最小限) */
-        /* スマートフォン向け */
-        @media (max-width: 600px) {
-            .hello-word {
-                /* フォントサイズなどを調整することも可能ですが、
-                   今回はJSで動的に調整します */
             }
         }
     </style>
@@ -76,40 +75,41 @@
             { lang: 'ru', text: 'Здравствуйте' },
             { lang: 'de', text: 'Hallo' },
             { lang: 'it', text: 'Ciao' },
-            // 必要に応じて追加
+            { lang: 'pt', text: 'Olá' },
         ];
         
-        // 外部のフリー画像サービスを利用（例: Unsplash Sourceの抽象的な画像）
-        // 著作権に配慮し、本番環境ではご自身で用意した画像リストを使用してください。
-        const BACKGROUND_IMAGES = [
-            'https://source.unsplash.com/1600x900/?abstract,pattern,color',
-            'https://source.unsplash.com/1600x900/?nature,minimalist,landscape',
-            'https://source.unsplash.com/1600x900/?technology,futuristic,minimal',
-            // 他の画像を絶対パスで指定してもOK
-        ];
+        // **ユーザー指定の背景画像URL**
+        const BACKGROUND_IMAGE_URL = 'https://picsum.photos/1920/1080?random';
 
-        let zIndexCounter = 100; // Z-Index管理
-        let lastLeft = -100; // 前回の左端位置を記憶
-        let lastWidth = 0;   // 前回の要素の幅を記憶
+        let zIndexCounter = 0; // Z-Index管理 (新しいものが背面になるようにデクリメント式で使う)
+        let columnPositions = []; // 各列の次に来るべき左端の位置を記憶
+        let maxColumns = 10; // 画面幅に応じて調整する列の最大数
         let maxFontSize; // 最大フォントサイズ（レスポンシブ）
+        let minSpace = 5; // 要素間の最小スペース (px)
+
 
         // --- ユーティリティ関数 ---
 
         /**
-         * 画面サイズに基づいて最大フォントサイズを決定する (レスポンシブ)
+         * 画面サイズに基づいて最大フォントサイズと列数を決定する (レスポンシブ)
          */
-        function updateMaxFontSize() {
+        function updateLayoutSettings() {
             const width = window.innerWidth;
             if (width < 600) { // スマホ
-                maxFontSize = 40; 
+                maxFontSize = 30; 
+                maxColumns = 5;
             } else if (width < 1024) { // タブレット
-                maxFontSize = 60;
+                maxFontSize = 50;
+                maxColumns = 7;
             } else { // PC
                 maxFontSize = 80;
+                maxColumns = 10;
             }
+            // 列位置配列をリセット/初期化
+            columnPositions = Array(maxColumns).fill(0);
         }
-        updateMaxFontSize();
-        window.addEventListener('resize', updateMaxFontSize);
+        updateLayoutSettings();
+        window.addEventListener('resize', updateLayoutSettings);
 
 
         /**
@@ -133,20 +133,12 @@
         }
 
         /**
-         * HSL形式でランダムな色を生成し、背景色との類似度をチェック
-         * @param {string} bgColor CSSの背景色 (例: 'rgb(r, g, b)')
-         * @returns {string} CSSの色の値 (例: 'hsl(h, s, l)')
+         * HSL形式でランダムな色を生成（落下時に黒にならないように明度を調整）
          */
         function getRandomHslColor() {
-            // 色相 (Hue) をランダムに設定
             const h = Math.floor(Math.random() * 360);
-            
-            // 彩度 (Saturation) は高く設定し、色を鮮やかに
             const s = Math.floor(Math.random() * 30) + 70; // 70% - 100%
-            
-            // 明度 (Lightness) は中間からやや高めに設定し、黒っぽくならないように
-            // 落下時に黒にしないという要件に対応。
-            const l = Math.floor(Math.random() * 30) + 50; // 50% - 80%
+            const l = Math.floor(Math.random() * 30) + 50; // 50% - 80% (黒を回避)
 
             return `hsl(${h}, ${s}%, ${l}%)`;
         }
@@ -163,84 +155,90 @@
             wordElement.className = 'hello-word';
 
             // 1. サイズと色
-            const fontSize = Math.floor(Math.random() * (maxFontSize / 2) + (maxFontSize / 2)); // maxFontSize/2 から maxFontSize まで
+            const fontSize = Math.floor(Math.random() * (maxFontSize / 2) + (maxFontSize / 2));
             wordElement.style.fontSize = `${fontSize}px`;
-            
-            const color = getRandomHslColor();
-            wordElement.style.color = color;
-            wordElement.dataset.initialColor = color; // 初期色を保持
+            wordElement.style.color = getRandomHslColor();
             
             // 2. 回転
-            const rotation = getRandomRotation();
-            wordElement.style.setProperty('--initial-rotation', `${rotation}deg`);
-            wordElement.style.setProperty('--final-rotation', `${rotation + Math.random() * 720 - 360}deg`); // 落下中にランダムに回転
+            const initialRotation = getRandomRotation();
+            wordElement.style.setProperty('--initial-rotation', `${initialRotation}deg`);
+            wordElement.style.setProperty('--final-rotation', `${initialRotation + Math.random() * 720 - 360}deg`);
             
-            // 3. Z-index (後から生成されたものが手前に)
-            zIndexCounter++; 
-            wordElement.style.zIndex = zIndexCounter; // **後から生成されたものが後面に** という要件をZ-Indexのデクリメントで実現
-            // 訂正: ユーザーの要求は **後から生成されたものは後面に** で、CSSの描画順序ではZ-indexが**低い**ものが背面になります。
-            // したがって、zIndexCounterをデクリメントして古いものより低いZ-Indexを割り当てる必要があります。
-            // zIndexCounter--; // これだと初期値が100で、99, 98, ... となり新しいものが背面に
-            // Z-Indexをインクリメントし、`position: absolute`のデフォルト描画順序（後に追加された要素が手前）を逆転させるために、
-            // 新しい要素を強制的に背面にするには、Z-Indexを古い要素よりも低くする必要があります。
-            // ...しかし、ここではZ-Indexをインクリメントし続け、CSSの描画順序に依存して、
-            // 「後から生成されたものが手前」として動作させます（一般的なWebアニメーションの期待動作）。
-            // **ユーザーの要求が「後から生成されたものは後面に」の場合、Z-Indexをデクリメントします。**
-            wordElement.style.zIndex = 1000 - zIndexCounter; // 新しいものが低いZ-index（背面）になるように
+            // 3. 落下時間
+            // 落下時間をランダムに設定（速すぎず遅すぎない範囲で）
+            const duration = Math.floor(Math.random() * 5) + 7; // 7秒から12秒
+            wordElement.style.setProperty('--duration', `${duration}s`);
+            
+            // 4. Z-index (後から生成されたものは後面に)
+            // zIndexCounterをインクリメントし、1000から引くことで、後から生成された要素ほど低いZ-index（背面）になる。
+            zIndexCounter++;
+            wordElement.style.zIndex = 1000 - zIndexCounter;
 
-            // 4. 配置 (文字が重ならないように)
+            // 5. 配置 (文字が重ならないように)
             document.body.appendChild(wordElement);
             
-            // 要素がDOMに追加された後に幅を取得
             const wordWidth = wordElement.offsetWidth;
+            const screenWidth = window.innerWidth;
             
-            // 重なり防止ロジック
-            let leftPosition;
-            const minSpace = 10; // 要素間の最小スペース (px)
+            // 重なり防止ロジック: 複数の列を管理
+            let bestColumn = -1;
+            let bestX = -1;
             
-            if (lastLeft + lastWidth + minSpace > window.innerWidth) {
-                // 画面右端を超えた場合、最初からやり直す
-                lastLeft = -wordWidth - minSpace;
-                lastWidth = 0;
+            for (let i = 0; i < maxColumns; i++) {
+                // 列の開始位置を均等に計算
+                const columnStart = (screenWidth / maxColumns) * i;
+                
+                // 列の現在の位置
+                const currentX = Math.max(columnStart, columnPositions[i]);
+                
+                // 要素が画面内に収まるかチェック
+                if (currentX + wordWidth + minSpace < screenWidth) {
+                    bestColumn = i;
+                    bestX = currentX;
+                    break; 
+                }
             }
 
-            // 新しい位置を計算
-            leftPosition = lastLeft + lastWidth + minSpace;
-
-            // ランダム性を少し加える
-            leftPosition += Math.random() * 20;
-
-            // 画面の右端を超えないように調整
-            if (leftPosition + wordWidth > window.innerWidth) {
-                leftPosition = window.innerWidth - wordWidth;
+            if (bestColumn !== -1) {
+                // 最適な列に配置
+                wordElement.style.left = `${bestX}px`;
+                // 次の要素のために列の位置を更新
+                columnPositions[bestColumn] = bestX + wordWidth + minSpace;
+            } else {
+                // 画面がいっぱいになった場合や、配置が難しかった場合はランダムな位置に配置
+                // この要素は重なる可能性があるが、完全に停止することを避ける
+                wordElement.style.left = `${Math.random() * (screenWidth - wordWidth)}px`;
             }
-            
-            wordElement.style.left = `${leftPosition}px`;
-            
-            // 次の要素のために位置を更新
-            lastLeft = leftPosition;
-            lastWidth = wordWidth;
 
-            // 5. 色の連続的なランダム変更
+            // 6. 色の連続的なランダム変更
             const colorInterval = setInterval(() => {
                 wordElement.style.color = getRandomHslColor();
             }, 500); // 0.5秒ごとに色を変更
 
-            // 6. アニメーション終了時の処理 (要素削除とインターバルクリア)
+            // 7. アニメーション終了時の処理 (要素削除とインターバルクリア)
             wordElement.addEventListener('animationend', () => {
                 wordElement.remove();
                 clearInterval(colorInterval);
             });
+            
+            // 8. 落下後、列の位置をリセットする処理
+            // アニメーションが終了したら、その要素が占めていたであろう列のスペースを将来的に再利用可能にする
+            setTimeout(() => {
+                // ここでcolumnPositionsをリセットするのは複雑になるため、一定時間後にリセットする処理は省略
+                // （代わりに、列位置を画面外に移動させることで再利用を促進）
+                if (bestColumn !== -1) {
+                   columnPositions[bestColumn] = -wordWidth - minSpace;
+                }
+            }, duration * 1000);
         }
 
         /**
          * ランダムな背景画像を設定
          */
         function setRandomBackground() {
-            const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
-            const imageUrl = BACKGROUND_IMAGES[randomIndex];
-            
-            // 一旦黒いオーバーレイを挟むことで、背景画像の色変化が滑らかに見えるようにする（今回はシンプルに直接変更）
+            // PicsumのURLはアクセスごとにランダムな画像を提供します。
+            // キャッシュを防ぎ、確実に新しい画像を取得するために、URLに時刻スタンプを追加します。
+            const imageUrl = `${BACKGROUND_IMAGE_URL}&t=${new Date().getTime()}`;
             document.body.style.backgroundImage = `url('${imageUrl}')`;
         }
 
