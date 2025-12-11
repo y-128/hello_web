@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delayed Color Reveal Falling Greetings</title>
+    <title>Transparent Generated Falling Greetings</title>
     <style>
         /* 1. ページ全体の設定 */
         body {
@@ -21,24 +21,34 @@
             white-space: nowrap;
             line-height: 1;
             filter: blur(1px); 
-            opacity: 0.8; 
             
-            /* アニメーションを適用: 落下、色変化、★色フェードアウト★ */
+            /* 初期透明度を設定。アニメーションが開始するまでは完全に透明（生成時） */
+            opacity: 0; 
+            
+            /* アニメーションを適用: 落下、色変化 */
             animation: fall-down var(--duration) linear var(--delay) infinite,
-                       color-change var(--color-duration) linear infinite,
-                       color-fade 2s steps(1) var(--delay) forwards; /* ★新しいアニメーション★ */
+                       color-change var(--color-duration) linear infinite;
         }
 
-        /* 3. 落下アニメーションの定義 (変更なし) */
+        /* 3. 落下アニメーションの定義 (透明度の調整) */
         @keyframes fall-down {
-            0% { transform: translate(0, -10vh); opacity: 0; }
-            5% { opacity: 0.9; }
-            100% { transform: translate(0, 110vh); opacity: 0; }
+            0% { 
+                transform: translate(0, -10vh); 
+                opacity: 0; /* 画面外では透明 */
+            }
+            1% {
+                /* 落下開始直前（1%の時点）で不透明度を上げる */
+                opacity: 0.9; 
+            }
+            100% { 
+                transform: translate(0, 110vh); 
+                opacity: 0; /* 画面外に出る直前で再び透明に */
+            }
         }
 
-        /* 4. 色変化アニメーションの定義 (ランダムな色変化) */
+        /* 4. 色変化アニメーションの定義 (変更なし) */
         @keyframes color-change {
-            /* HSLで連続的な変化 */
+            /* HSLで連続的な変化と残像（text-shadow） */
             0% { color: hsl(0, 100%, 70%); text-shadow: 0 0 5px hsl(0, 100%, 50%), 0 0 10px hsl(0, 100%, 60%); }
             20% { color: hsl(60, 100%, 70%); text-shadow: 0 0 5px hsl(60, 100%, 50%), 0 0 10px hsl(60, 100%, 60%); }
             40% { color: hsl(120, 100%, 70%); text-shadow: 0 0 5px hsl(120, 100%, 50%), 0 0 10px hsl(120, 100%, 60%); }
@@ -46,33 +56,6 @@
             80% { color: hsl(300, 100%, 70%); text-shadow: 0 0 5px hsl(300, 100%, 50%), 0 0 10px hsl(300, 100%, 60%); }
             100% { color: hsl(360, 100%, 70%); text-shadow: 0 0 5px hsl(360, 100%, 50%), 0 0 10px hsl(360, 100%, 60%); }
         }
-        
-        /* 5. ★最初の2秒間だけ黒色にするアニメーション★ */
-        @keyframes color-fade {
-            0% { 
-                color: black !important; 
-                text-shadow: none !important; 
-                opacity: 0.01 !important; /* 僅かに透明度を下げる */
-            }
-            100% { 
-                color: transparent !important; /* アニメーション終了時に透明にする */
-                text-shadow: none !important; 
-            }
-        }
-        
-        /* color-fadeアニメーションが終了した後のスタイルを上書き */
-        /* opacityがcolor-fadeによって0.01に設定されたままにならないように、
-           アニメーション終了後の状態をリセットする。*/
-        .greeting-unit {
-            /* color-fadeの実行が終わった後、通常のcolor-changeアニメーションが効くように設定 */
-            animation-name: fall-down, color-change, color-fade;
-            animation-duration: var(--duration), var(--color-duration), 2s;
-            animation-delay: var(--delay), var(--color-delay), var(--delay);
-            animation-timing-function: linear, linear, steps(1);
-            animation-iteration-count: infinite, infinite, 1; /* color-fadeは1回実行 */
-            animation-fill-mode: forwards, none, forwards;
-        }
-
     </style>
 </head>
 <body>
@@ -92,8 +75,6 @@
         const COLOR_ANIMATION_DURATION = 10; 
         const COL_GRID = 10; 
         const ROW_GRID = 5;  
-        
-        // (省略): getRandomNumber関数は変更なし
 
         function getRandomNumber(min, max) {
             return Math.random() * (max - min) + min;
@@ -140,8 +121,8 @@
             // 4. 色変化アニメーションの開始遅延と周期を設定
             const colorDelay = getRandomNumber(0, COLOR_ANIMATION_DURATION);
             word.style.setProperty('--color-duration', `${COLOR_ANIMATION_DURATION}s`);
-            // fall-down, color-change, color-fade の順に遅延を設定
-            word.style.animationDelay = `${delay}s, ${colorDelay}s, ${delay}s`; 
+            // fall-down, color-change の順に遅延を設定
+            word.style.animationDelay = `${delay}s, ${colorDelay}s`; 
 
             // 5. Z軸の奥行き
             word.style.zIndex = Math.round(fontSize * 10);
