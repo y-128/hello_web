@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glowing Falling Multi-Language Greetings</title>
+    <style>
+        /* 1. ページ全体の設定 */
+        body {
+            background-color: black;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; 
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            position: relative;
+        }
+
+        /* 2. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            position: absolute;
+            white-space: nowrap;
+            line-height: 1;
+            /* ★残像効果のベース: ぼかしと初期透明度 */
+            filter: blur(1px); /* 軽いぼかしで残像感を出す */
+            opacity: 0.8; 
+            
+            animation: fall-down var(--duration) linear var(--delay) infinite,
+                       color-change var(--color-duration) linear infinite; /* 色変化アニメーションを追加 */
+        }
+
+        /* 3. 落下アニメーションの定義 (変更なし) */
+        @keyframes fall-down {
+            0% {
+                transform: translate(0, -10vh); 
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.9; 
+            }
+            100% {
+                transform: translate(0, 100vh);
+                opacity: 0;
+            }
+        }
+
+        /* 4. ★色変化アニメーションの定義 */
+        @keyframes color-change {
+            0% { color: hsl(0, 100%, 70%); text-shadow: 0 0 5px hsl(0, 100%, 50%), 0 0 10px hsl(0, 100%, 60%); }
+            20% { color: hsl(60, 100%, 70%); text-shadow: 0 0 5px hsl(60, 100%, 50%), 0 0 10px hsl(60, 100%, 60%); }
+            40% { color: hsl(120, 100%, 70%); text-shadow: 0 0 5px hsl(120, 100%, 50%), 0 0 10px hsl(120, 100%, 60%); }
+            60% { color: hsl(240, 100%, 70%); text-shadow: 0 0 5px hsl(240, 100%, 50%), 0 0 10px hsl(240, 100%, 60%); }
+            80% { color: hsl(300, 100%, 70%); text-shadow: 0 0 5px hsl(300, 100%, 50%), 0 0 10px hsl(300, 100%, 60%); }
+            100% { color: hsl(360, 100%, 70%); text-shadow: 0 0 5px hsl(360, 100%, 50%), 0 0 10px hsl(360, 100%, 60%); }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const LANGUAGES = [
+            "こんにちは", "Hello", "Hola", "你好", "Bonjour", 
+            "안녕하세요", "Guten Tag", "Ciao", "Olá", "Здравствуйте",
+            "مرحبا", "Goddag", "Dobrý den", "Selamat siang", "Xin chào", 
+            "Hujambo", "Shalom", "Kaliméra"
+        ];
+        
+        const NUM_WORDS = 60; // 画面に同時に存在する文字の総数 (少し増やしました)
+        const MAX_SIZE = 6;   // 最大フォントサイズ (vw) (少し大きくしました)
+        const MIN_SIZE = 2;   // 最小フォントサイズ (vw)
+        const MAX_DURATION = 20; // 最大落下時間 (s)
+        const MIN_DURATION = 10; // 最小落下時間 (s)
+        const COLOR_ANIMATION_DURATION = 10; // 色変化アニメーションの周期 (s)
+
+        /**
+         * 最小値と最大値の間の乱数を取得する関数
+         * @param {number} min 最小値
+         * @param {number} max 最大値
+         */
+        function getRandomNumber(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        /**
+         * 文字要素を生成し、ランダムなスタイルとアニメーションを適用する関数
+         */
+        function createFallingWord() {
+            const word = document.createElement('div');
+            word.textContent = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)];
+            word.classList.add('greeting-unit');
+
+            // 1. サイズ (vw) をランダムに設定
+            const fontSize = getRandomNumber(MIN_SIZE, MAX_SIZE);
+            word.style.fontSize = `${fontSize}vw`;
+
+            // 2. 水平位置 (left) をランダムに設定
+            const leftPosition = getRandomNumber(-10, 100); // 画面外の左から右まで広く配置
+            word.style.left = `${leftPosition}vw`;
+
+            // 3. 落下アニメーション時間 (速さ) をランダムに設定
+            const duration = getRandomNumber(MIN_DURATION, MAX_DURATION);
+            word.style.setProperty('--duration', `${duration}s`);
+            
+            // 4. 落下アニメーション開始遅延をランダムに設定
+            const delay = getRandomNumber(0, NUM_WORDS / 2); 
+            word.style.setProperty('--delay', `${delay}s`);
+            
+            // 5. 色変化アニメーションの開始遅延をランダムに設定し、色変化の周期も指定
+            const colorDelay = getRandomNumber(0, COLOR_ANIMATION_DURATION);
+            word.style.animationDelay = `${delay}s, ${colorDelay}s`; // fall-downとcolor-changeの遅延を個別設定
+            word.style.setProperty('--color-duration', `${COLOR_ANIMATION_DURATION}s`);
+
+            // 6. Z軸の奥行き (重なり対策) をランダムに設定
+            word.style.zIndex = Math.round(fontSize * 10);
+
+            document.body.appendChild(word);
+        }
+
+        // 指定した数の文字を生成し、時間差で落下させる
+        for (let i = 0; i < NUM_WORDS; i++) {
+            createFallingWord();
+        }
+
+        // (オプション) 動きを完全にバラけさせるために、アニメーション開始後に一部のスタイルを微調整
+        // translateXで左右に微動を加えることで、より有機的な動きに
+        document.querySelectorAll('.greeting-unit').forEach(word => {
+            const randomXOffset = getRandomNumber(-100, 100); 
+            word.style.transform = `translateX(${randomXOffset}px)`;
+        });
+
+    </script>
+</body>
+</html>
