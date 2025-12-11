@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>こんにちは</title>
+    <title>Final Falling Greetings with Rotation</title>
     <style>
         /* 1. ページ全体の設定 */
         body {
@@ -20,19 +20,28 @@
             position: absolute;
             white-space: nowrap;
             line-height: 1;
+            /* 残像効果のベース */
             filter: blur(1px); 
             opacity: 0; /* 生成時透明 */
             
             /* アニメーションを適用: 落下、色変化 */
             animation: fall-down var(--duration) linear var(--delay) infinite,
                        color-change var(--color-duration) linear infinite;
+            
+            /* ★初期回転角度を設定（JSで上書き） */
+            transform-origin: center center;
+            transform: rotate(var(--rotation));
         }
 
         /* 3. 落下アニメーションの定義 */
         @keyframes fall-down {
-            0% { transform: translate(0, -10vh); opacity: 0; }
+            0% { transform: translate(0, -10vh) rotate(var(--rotation)); opacity: 0; }
             1% { opacity: 0.9; } /* 落下開始直前で不透明に */
-            100% { transform: translate(0, 110vh); opacity: 0; }
+            100% { 
+                /* 落下中も回転を維持 */
+                transform: translate(0, 110vh) rotate(var(--rotation)); 
+                opacity: 0; 
+            }
         }
 
         /* 4. 色変化アニメーションの定義 */
@@ -63,7 +72,7 @@
         const COLOR_ANIMATION_DURATION = 10; 
         const COL_GRID = 10; 
         const ROW_GRID = 5;  
-        let zIndexCounter = NUM_WORDS; // Z-Indexの初期値を要素総数に設定
+        let zIndexCounter = NUM_WORDS; // Z-Indexの初期値 (後から生成されたものほど後面に)
 
         function getRandomNumber(min, max) {
             return Math.random() * (max - min) + min;
@@ -112,22 +121,28 @@
             word.style.setProperty('--color-duration', `${COLOR_ANIMATION_DURATION}s`);
             word.style.animationDelay = `${delay}s, ${colorDelay}s`; 
 
-            // 5. ★Z軸の順序制御: 後から生成されたものほどZ値を小さくする（後面に）★
+            // 5. Z軸の順序制御
             word.style.zIndex = zIndexCounter; 
-            zIndexCounter--; // カウンターをデクリメント
+            zIndexCounter--; 
+
+            // 6. ★文字の向き (回転) をランダムに設定★
+            const rotation = getRandomNumber(-360, 360); // -360度から360度の間でランダムに設定
+            word.style.setProperty('--rotation', `${rotation}deg`);
 
             document.body.appendChild(word);
             
-            // 6. X軸の微動
+            // 7. X軸の微動 (ランダムな回転と微動を両方適用)
             const randomXOffset = getRandomNumber(-100, 100); 
-            word.style.transform = `translateX(${randomXOffset}px)`;
+            // transformプロパティを上書きするのではなく、元の回転を残しつつtranslateを適用
+            word.style.transform += ` translateX(${randomXOffset}px)`;
         }
 
         // 指定した数の文字を生成
         for (let i = 0; i < NUM_WORDS; i++) {
             createFallingWord(i);
         }
-/* Coded by Gemini */
+
     </script>
+    // coded by Gemini
 </body>
 </html>
