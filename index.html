@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Falling Greetings with Rotation</title>
+    <title>Final Falling Greetings with Controlled Rotation</title>
     <style>
         /* 1. ページ全体の設定 */
         body {
@@ -20,7 +20,6 @@
             position: absolute;
             white-space: nowrap;
             line-height: 1;
-            /* 残像効果のベース */
             filter: blur(1px); 
             opacity: 0; /* 生成時透明 */
             
@@ -28,7 +27,7 @@
             animation: fall-down var(--duration) linear var(--delay) infinite,
                        color-change var(--color-duration) linear infinite;
             
-            /* ★初期回転角度を設定（JSで上書き） */
+            /* 初期回転角度を設定（JSで上書き） */
             transform-origin: center center;
             transform: rotate(var(--rotation));
         }
@@ -77,6 +76,31 @@
         function getRandomNumber(min, max) {
             return Math.random() * (max - min) + min;
         }
+// --- 確率制御のための関数 ---
+        /**
+         * 指定された確率に基づいてランダムな回転角度を取得する関数
+         * 0度(40%)、40度(40%)、90度(20%)、-90度(5%)、残りはランダム(35%)
+         */
+        function getRandomRotation() {
+            const rand = Math.random(); // 0から1の乱数
+            let rotation = 0;
+
+            if (rand < 0.40) {
+                // 40% の確率で 0度
+                rotation = 0;
+            } else if (rand < 0.40 + 0.20) {
+                // 20% の確率で 90度
+                rotation = 90;
+            } else if (rand < 0.40 + 0.20 + 0.05) {
+                // 5% の確率で -90度
+                rotation = -90;
+            } else {
+                // 残り (35%) の確率で -360度から360度の間のランダムな角度
+                rotation = getRandomNumber(-360, 360);
+            }
+            return rotation;
+        }
+// ----------------------------
 
         let initialPositions = [];
         for (let r = 0; r < ROW_GRID; r++) {
@@ -125,15 +149,14 @@
             word.style.zIndex = zIndexCounter; 
             zIndexCounter--; 
 
-            // 6. ★文字の向き (回転) をランダムに設定★
-            const rotation = getRandomNumber(-360, 360); // -360度から360度の間でランダムに設定
+            // 6. ★文字の向き (回転) を確率に基づいて設定★
+            const rotation = getRandomRotation(); 
             word.style.setProperty('--rotation', `${rotation}deg`);
 
             document.body.appendChild(word);
             
-            // 7. X軸の微動 (ランダムな回転と微動を両方適用)
+            // 7. X軸の微動
             const randomXOffset = getRandomNumber(-100, 100); 
-            // transformプロパティを上書きするのではなく、元の回転を残しつつtranslateを適用
             word.style.transform += ` translateX(${randomXOffset}px)`;
         }
 
