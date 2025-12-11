@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Overlapping Falling Greetings</title>
+    <style>
+        /* 1. ページ全体の設定 */
+        body {
+            background-color: black;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; 
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            position: relative;
+        }
+
+        /* 2. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            position: absolute;
+            white-space: nowrap;
+            line-height: 1;
+            opacity: 0.8; 
+            
+            /* ★調整1: 幅を制限し、重なりにくくする */
+            width: auto; /* コンテンツの幅を自動調整 */
+            min-width: 10vw; /* 最小幅を設定し、配置エリアを確保 */
+            text-align: center; 
+            
+            animation: fall-down var(--duration) linear var(--delay) infinite;
+        }
+
+        /* 3. 落下アニメーションの定義 */
+        @keyframes fall-down {
+            0% {
+                /* 開始X位置をカスタムプロパティで指定 */
+                transform: translate3d(var(--x-start), -10vh, 0); 
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.9; 
+            }
+            100% {
+                /* 終了X位置をカスタムプロパティで指定 */
+                transform: translate3d(var(--x-end), 100vh, 0);
+                opacity: 0;
+            }
+        }
+
+        /* 4. サイズごとの文字の設定 */
+        .size-large { font-size: 5vw; }
+        .size-medium { font-size: 3vw; }
+        .size-small { font-size: 1.5vw; }
+        
+        /* 5. 制御用の変数設定（より広く、長くバラけた軌道を設定） */
+        
+        /* 軌道V1: 左上から右下へ（遅い） */
+        .v1 { --x-start: -40vw; --x-end: 40vw; --duration: 12s; --delay: 0s; }
+        /* 軌道V2: 右上から左下へ（速い） */
+        .v2 { --x-start: 45vw; --x-end: -45vw; --duration: 8s; --delay: 1.5s; }
+        /* 軌道V3: 中央上から中央下へ（普通） */
+        .v3 { --x-start: 0; --x-end: 0; --duration: 10s; --delay: 3s; }
+        /* 軌道V4: 中央やや左から右下へ（遅い） */
+        .v4 { --x-start: -15vw; --x-end: 20vw; --duration: 11s; --delay: 4.5s; }
+        /* 軌道V5: 中央やや右から左下へ（速い） */
+        .v5 { --x-start: 15vw; --x-end: -20vw; --duration: 9s; --delay: 6s; }
+        /* 軌道V6: 非常に広く右へ */
+        .v6 { --x-start: -50vw; --x-end: 50vw; --duration: 13s; --delay: 7.5s; }
+        /* 軌道V7: 非常に広く左へ */
+        .v7 { --x-start: 50vw; --x-end: -50vw; --duration: 14s; --delay: 9s; }
+
+    </style>
+</head>
+<body>
+    <div class="greeting-unit size-large v1">こんにちは</div>
+    <div class="greeting-unit size-medium v2">Hello</div>
+    <div class="greeting-unit size-small v3">Hola</div>
+    <div class="greeting-unit size-large v4">你好</div>
+    <div class="greeting-unit size-medium v5">Bonjour</div>
+    <div class="greeting-unit size-small v6">안녕하세요</div>
+    <div class="greeting-unit size-large v7">Guten Tag</div>
+    
+    <div class="greeting-unit size-medium v1">Ciao</div>
+    <div class="greeting-unit size-small v2">Olá</div>
+    <div class="greeting-unit size-large v3">Здравствуйте</div>
+    
+    <div class="greeting-unit size-medium v4">مرحبا</div>
+    <div class="greeting-unit size-small v5">Goddag</div>
+    <div class="greeting-unit size-large v6">Dobrý den</div>
+    
+    <div class="greeting-unit size-medium v7">Selamat siang</div>
+    <div class="greeting-unit size-small v1">Xin chào</div>
+    <div class="greeting-unit size-large v2">Hujambo</div>
+    
+    </body>
+</html>
