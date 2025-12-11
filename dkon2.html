@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequential Falling Greetings</title>
+    <style>
+        /* 1. ページ全体の設定 */
+        body {
+            background-color: black;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; 
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            position: relative;
+        }
+
+        /* 2. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            position: absolute;
+            white-space: nowrap;
+            line-height: 1;
+            opacity: 0.8; 
+            width: auto;
+            min-width: 10vw; 
+            text-align: center; 
+            
+            /* すべての要素に共通のアニメーションプロパティを設定 */
+            /* 落下時間は統一し、10秒で画面外へ落ちる */
+            animation-duration: 10s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            animation-name: fall-down;
+        }
+
+        /* 3. 落下アニメーションの定義 */
+        @keyframes fall-down {
+            0% {
+                transform: translate3d(var(--x-start), -10vh, 0); 
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.9; 
+            }
+            100% {
+                transform: translate3d(var(--x-end), 100vh, 0);
+                opacity: 0;
+            }
+        }
+
+        /* 4. サイズごとの文字の設定 */
+        .size-large { font-size: 5vw; }
+        .size-medium { font-size: 3vw; }
+        .size-small { font-size: 1.5vw; }
+        
+        /* 5. 軌道制御用の変数設定 (ランダムな動きを維持) */
+        .v1 { --x-start: -40vw; --x-end: 40vw; }
+        .v2 { --x-start: 45vw; --x-end: -45vw; }
+        .v3 { --x-start: 0; --x-end: 0; }
+        .v4 { --x-start: -15vw; --x-end: 20vw; }
+        .v5 { --x-start: 15vw; --x-end: -20vw; }
+        .v6 { --x-start: -50vw; --x-end: 50vw; }
+        .v7 { --x-start: 50vw; --x-end: -50vw; }
+        .v8 { --x-start: -25vw; --x-end: -10vw; }
+        .v9 { --x-start: 25vw; --x-end: 10vw; }
+        .v10 { --x-start: 5vw; --x-end: -5vw; }
+
+        /* 6. 言語グループごとの遅延設定 ★★★ ここが制御のポイント ★★★ */
+        /*
+         * 1言語グループあたりの表示時間 = 10秒 (animation-duration)
+         * 2言語目 (英語) は 10秒後に開始
+         * 3言語目 (スペイン語) は 20秒後に開始, ...
+         */
+        .lang-group-1 { animation-delay: 0s; }    /* 日本語: 0秒後に開始 */
+        .lang-group-2 { animation-delay: 10s; }   /* 英語: 10秒後に開始 */
+        .lang-group-3 { animation-delay: 20s; }   /* スペイン語: 20秒後に開始 */
+        .lang-group-4 { animation-delay: 30s; }   /* 中国語: 30秒後に開始 */
+        .lang-group-5 { animation-delay: 40s; }   /* フランス語: 40秒後に開始 */
+        .lang-group-6 { animation-delay: 50s; }   /* 韓国語: 50秒後に開始 */
+        /* ... 以降、10秒ずつ間隔を空けて設定できます */
+
+    </style>
+</head>
+<body>
+    <div class="greeting-unit size-large v1 lang-group-1">こんにちは</div>
+    <div class="greeting-unit size-medium v2 lang-group-1">こんにちは</div>
+    <div class="greeting-unit size-small v3 lang-group-1">こんにちは</div>
+    <div class="greeting-unit size-large v4 lang-group-1">こんにちは</div>
+    
+    <div class="greeting-unit size-medium v5 lang-group-2">Hello</div>
+    <div class="greeting-unit size-small v6 lang-group-2">Hello</div>
+    <div class="greeting-unit size-large v7 lang-group-2">Hello</div>
+    <div class="greeting-unit size-medium v8 lang-group-2">Hello</div>
+
+    <div class="greeting-unit size-small v9 lang-group-3">Hola</div>
+    <div class="greeting-unit size-large v10 lang-group-3">Hola</div>
+    <div class="greeting-unit size-medium v1 lang-group-3">Hola</div>
+    <div class="greeting-unit size-small v2 lang-group-3">Hola</div>
+
+    <div class="greeting-unit size-large v3 lang-group-4">你好</div>
+    <div class="greeting-unit size-medium v4 lang-group-4">你好</div>
+    <div class="greeting-unit size-small v5 lang-group-4">你好</div>
+    
+    <div class="greeting-unit size-medium v6 lang-group-5">Bonjour</div>
+    <div class="greeting-unit size-large v7 lang-group-5">Bonjour</div>
+    <div class="greeting-unit size-small v8 lang-group-5">Bonjour</div>
+    
+    <div class="greeting-unit size-large v9 lang-group-6">안녕하세요</div>
+    <div class="greeting-unit size-medium v10 lang-group-6">안녕하세요</div>
+    <div class="greeting-unit size-small v1 lang-group-6">안녕하세요</div>
+    
+</body>
+</html>
