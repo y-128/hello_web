@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniform Multi-Language Greetings</title>
+    <style>
+        /* 1. ページ全体（body）の設定 */
+        body {
+            /* 背景色を黒、文字色を白に設定 */
+            background-color: black;
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            /* 多言語対応のため、一般的なフォントを指定 */
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            
+            /* Flexboxで配置を制御 */
+            display: flex;
+            flex-wrap: wrap; /* 要素を折り返す */
+            justify-content: center; /* 水平方向の中央揃え */
+            align-items: center; /* 垂直方向の中央揃え */
+            text-align: center;
+        }
+
+        /* 2. 各テキスト要素の設定 (サイズと透明度を統一) */
+        .greeting-unit {
+            flex: 0 0 auto;
+            white-space: nowrap; /* 行の途中で改行されないように */
+            padding: 5px 10px;
+            line-height: 1; 
+            text-rendering: optimizeLegibility;
+
+            /* ★★★ サイズを均一に設定 ★★★ */
+            font-size: 5vw; /* 画面幅の5%をフォントサイズに設定 (任意で変更可) */
+            opacity: 0.9;   /* 透明度を統一 (任意で変更可) */
+        }
+    </style>
+</head>
+<body>
+    <div class="greeting-unit">こんにちは</div>  <div class="greeting-unit">Hello</div>        <div class="greeting-unit">Hola</div>         <div class="greeting-unit">你好</div>         <div class="greeting-unit">Bonjour</div>      <div class="greeting-unit">안녕하세요</div>     <div class="greeting-unit">Guten Tag</div>    <div class="greeting-unit">Ciao</div>         <div class="greeting-unit">Olá</div>          <div class="greeting-unit">Здравствуйте</div> <div class="greeting-unit">مرحبا</div>        <div class="greeting-unit">Goddag</div>       <div class="greeting-unit">Dobrý den</div>    <div class="greeting-unit">Selamat siang</div><div class="greeting-unit">Xin chào</div>     <div class="greeting-unit">Hujambo</div>      <div class="greeting-unit">Shalom</div>       <div class="greeting-unit">Kaliméra</div>     <div class="greeting-unit">Yiasas</div>       <div class="greeting-unit">Sawubona</div>     <div class="greeting-unit">こんにちは</div>
+    <div class="greeting-unit">Hello</div>
+    <div class="greeting-unit">Hola</div>
+    <div class="greeting-unit">你好</div>
+    <div class="greeting-unit">Bonjour</div>
+    <div class="greeting-unit">안녕하세요</div>
+    <div class="greeting-unit">Guten Tag</div>
+    <div class="greeting-unit">Ciao</div>
+    <div class="greeting-unit">Olá</div>
+    <div class="greeting-unit">Здравствуйте</div>
+    
+    <div class="greeting-unit">مرحبا</div>
+    <div class="greeting-unit">Goddag</div>
+    <div class="greeting-unit">Dobrý den</div>
+    <div class="greeting-unit">Selamat siang</div>
+    <div class="greeting-unit">Xin chào</div>
+    <div class="greeting-unit">Hujambo</div>
+    <div class="greeting-unit">Shalom</div>
+    <div class="greeting-unit">Kaliméra</div>
+    <div class="greeting-unit">Yiasas</div>
+    <div class="greeting-unit">Sawubona</div>
+    
+</body>
+</html>
