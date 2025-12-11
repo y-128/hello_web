@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Multi-Language Greetings</title>
+    <style>
+        /* 1. ページ全体の設定 */
+        body {
+            background-color: black;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; /* 画面外に落ちた文字でスクロールバーが出ないように */
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            position: relative;
+        }
+
+        /* 2. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            position: absolute;
+            white-space: nowrap;
+            line-height: 1;
+            /* サイズと不透明度の初期値 */
+            opacity: 0.8; 
+            
+            /* アニメーションを適用 */
+            /* duration, timing-function, delay, iteration-count */
+            animation: fall-down var(--duration) linear var(--delay) infinite;
+        }
+
+        /* 3. 落下アニメーションの定義 */
+        @keyframes fall-down {
+            0% {
+                /* 初期状態: 画面上部のランダムなX位置に配置 */
+                transform: translate3d(var(--x-start), -10vh, 0); /* 画面外の上部から開始 */
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.8; /* 見え始める */
+            }
+            100% {
+                /* 最終状態: 画面下部のランダムなX位置へ移動 */
+                transform: translate3d(var(--x-end), 100vh, 0);
+                opacity: 0;
+            }
+        }
+
+        /* 4. サイズごとの文字の設定（今回はサイズもばらつかせます） */
+        .size-large { font-size: 5vw; }
+        .size-medium { font-size: 3vw; }
+        .size-small { font-size: 1.5vw; }
+        
+        /* 5. 制御用の変数設定（個々の要素にランダムな動きを適用するため） */
+        /*
+         * 変数:
+         * --x-start: 開始X座標 (画面中央を0として-50vwから50vw)
+         * --x-end: 終了X座標 (左右への動きの幅)
+         * --duration: 落下にかかる時間 (速さ)
+         * --delay: アニメーションの開始遅延時間
+         */
+
+        /* 以下の要素は、JavaScriptを使わずにランダムな動きをシミュレートするために、
+           CSSで複数のバリエーションを用意しています。 */
+        
+        /* 速く、大きく、左へ流れる */
+        .v1 { --x-start: -30vw; --x-end: -40vw; --duration: 6s; --delay: 0s; }
+        .v2 { --x-start: 10vw; --x-end: 5vw; --duration: 7s; --delay: 1.5s; }
+        .v3 { --x-start: -5vw; --x-end: 10vw; --duration: 8s; --delay: 3s; }
+        
+        /* 遅れて、小さく、右へ流れる */
+        .v4 { --x-start: 40vw; --x-end: 30vw; --duration: 9s; --delay: 4.5s; }
+        .v5 { --x-start: 20vw; --x-end: -5vw; --duration: 10s; --delay: 6s; }
+        .v6 { --x-start: -10vw; --x-end: -20vw; --duration: 7s; --delay: 7.5s; }
+        
+        /* 中間的な動き */
+        .v7 { --x-start: 0; --x-end: 0; --duration: 8s; --delay: 9s; }
+        .v8 { --x-start: -45vw; --x-end: -50vw; --duration: 9s; --delay: 10.5s; }
+    </style>
+</head>
+<body>
+    <div class="greeting-unit size-large v1">こんにちは</div>
+    <div class="greeting-unit size-medium v2">Hello</div>
+    <div class="greeting-unit size-small v3">Hola</div>
+    <div class="greeting-unit size-large v4">你好</div>
+    <div class="greeting-unit size-medium v5">Bonjour</div>
+    <div class="greeting-unit size-small v6">안녕하세요</div>
+    <div class="greeting-unit size-large v7">Guten Tag</div>
+    <div class="greeting-unit size-medium v8">Ciao</div>
+    
+    <div class="greeting-unit size-small v1">Olá</div>
+    <div class="greeting-unit size-large v2">Здравствуйте</div>
+    <div class="greeting-unit size-medium v3">مرحبا</div>
+    <div class="greeting-unit size-small v4">Goddag</div>
+    
+    <div class="greeting-unit size-large v5">Dobrý den</div>
+    <div class="greeting-unit size-medium v6">Selamat siang</div>
+    <div class="greeting-unit size-small v7">Xin chào</div>
+    <div class="greeting-unit size-large v8">Hujambo</div>
+    
+    <div class="greeting-unit size-medium v1">Shalom</div>
+    <div class="greeting-unit size-small v2">Kaliméra</div>
+    <div class="greeting-unit size-large v3">こんにちは</div>
+    <div class="greeting-unit size-medium v4">Hello</div>
+
+</body>
+</html>
