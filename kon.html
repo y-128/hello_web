@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World Multi-Language</title>
+    <style>
+        /* 1. ページ全体（body）の設定 */
+        body {
+            /* 背景色を黒に設定 */
+            background-color: black;
+            /* 文字色を白に設定 */
+            color: white;
+            /* デフォルトのマージンとパディングをリセット */
+            margin: 0;
+            padding: 0;
+            /* 画面の高さを最低限確保 */
+            min-height: 100vh;
+            /* フォントを指定（多言語対応のため、ゴシック系が無難） */
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            
+            /* Flexboxで配置を制御 */
+            display: flex;
+            flex-wrap: wrap; /* 要素を折り返す */
+            justify-content: center; /* 水平方向の中央揃え */
+            align-items: center; /* 垂直方向の中央揃え */
+            text-align: center;
+        }
+
+        /* 2. 各テキスト要素の設定 */
+        .greeting-unit {
+            /* Flexアイテムとして扱えるように設定 */
+            flex: 0 0 auto;
+            white-space: nowrap; /* 行の途中で改行されないように */
+            padding: 5px 10px;
+            line-height: 1; /* 行の高さを詰めて見切れを抑える */
+            text-rendering: optimizeLegibility;
+        }
+
+        /* 3. サイズごとの文字の設定（vwで画面幅に応じたサイズを指定） */
+
+        /* 最大サイズ (見切れないよう12vwに設定) */
+        .size-extra-large {
+            font-size: 12vw; 
+            opacity: 0.8;
+        }
+
+        /* 大サイズ */
+        .size-large {
+            font-size: 8vw;
+            opacity: 1; 
+        }
+
+        /* 中サイズ */
+        .size-medium {
+            font-size: 5vw;
+            opacity: 0.7;
+        }
+
+        /* 小サイズ */
+        .size-small {
+            font-size: 3vw;
+            opacity: 0.9;
+        }
+
+        /* 非常に小さいサイズ */
+        .size-extra-small {
+            font-size: 1.5vw;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="greeting-unit size-extra-large">こんにちは</div>
+
+    <div class="greeting-unit size-medium">Hello</div>
+
+    <div class="greeting-unit size-large">Hola</div>
+
+    <div class="greeting-unit size-small">你好 (Nǐ hǎo)</div>
+
+    <div class="greeting-unit size-medium">Bonjour</div>
+
+    <div class="greeting-unit size-extra-large">안녕하세요 (Annyeonghaseyo)</div>
+
+    <div class="greeting-unit size-small">Guten Tag</div>
+
+    <div class="greeting-unit size-large">Ciao</div>
+    
+    <div class="greeting-unit size-medium">Olá</div>
+
+    <div class="greeting-unit size-extra-small">Здравствуйте (Zdravstvuyte)</div>
+
+    <div class="greeting-unit size-medium">مرحبا (Marhaban)</div>
+
+    <div class="greeting-unit size-small">こんにちは</div>
+
+</body>
+</html>
