@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowing Multi-Language Greetings</title>
+    <style>
+        /* 1. ページ全体の設定 */
+        body {
+            background-color: black;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; /* 流れ落ちた文字がスクロールバーを出さないように */
+            font-family: 'Arial Black', 'Helvetica Neue', 'Roboto', sans-serif;
+            perspective: 800px; /* 3D的な奥行きをbody全体に設定 */
+        }
+
+        /* 2. 放射状の回転の中心となるコンテナ */
+        .fountain-container {
+            width: 100%;
+            height: 100%;
+            position: relative; /* 子要素の絶対配置の基準点 */
+            /* 回転の中心（transform-origin）はデフォルトで中央だが、今回は文字が画面全体に広がるため、
+               個々の文字要素で回転の中心を設定する */
+        }
+
+        /* 3. 各テキスト要素の共通設定 */
+        .greeting-unit {
+            position: absolute;
+            left: 50%; /* 水平方向の中心に配置 */
+            top: 0; /* 垂直方向の最上部に配置（これが水の噴出点/原点となる） */
+            transform-origin: 50% 0; /* ★★★ 回転の中心を要素の最上部中央に設定 ★★★ */
+            white-space: nowrap;
+            line-height: 1;
+            /* サイズと不透明度の初期値 */
+            font-size: 1vw; 
+            opacity: 0.2; 
+            
+            /* アニメーションを適用 */
+            animation: flow-out 10s linear infinite;
+        }
+
+        /* 4. アニメーション定義: 中央から回転しながら外側へ、サイズも大きくなる */
+        @keyframes flow-out {
+            0% {
+                /* 初期状態: 中央上部、小さく、透明 */
+                transform: rotate(var(--angle)) translateY(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                /* 流れ始め: わずかに透明度とサイズを出す */
+                opacity: 0.5;
+                font-size: 1vw;
+            }
+            100% {
+                /* 最終状態: 画面下部へ移動、大きく、透明度も変化 */
+                transform: rotate(var(--angle)) translateY(120vh) scale(3); /* 下へ120vh移動し、3倍に拡大 */
+                opacity: 0;
+            }
+        }
+
+        /* 5. 各要素の個別設定（回転角度と遅延時間を設定） */
+        /* CSSカスタムプロパティ（--angle, --delay）を使用して角度と開始時間を制御 */
+        .g1 { --angle: -90deg; animation-delay: 0s; }
+        .g2 { --angle: -60deg; animation-delay: 0.5s; }
+        .g3 { --angle: -30deg; animation-delay: 1s; }
+        .g4 { --angle: 0deg;   animation-delay: 1.5s; } /* 真下 */
+        .g5 { --angle: 30deg;  animation-delay: 2s; }
+        .g6 { --angle: 60deg;  animation-delay: 2.5s; }
+        .g7 { --angle: 90deg;  animation-delay: 3s; }
+
+        /* さらに細かい角度と遅延時間で、密度の高い流れを表現 */
+        .g8 { --angle: -80deg; animation-delay: 3.5s; }
+        .g9 { --angle: -45deg; animation-delay: 4s; }
+        .g10 { --angle: -15deg; animation-delay: 4.5s; }
+        .g11 { --angle: 15deg;  animation-delay: 5s; }
+        .g12 { --angle: 45deg;  animation-delay: 5.5s; }
+        .g13 { --angle: 70deg;  animation-delay: 6s; }
+        /* 繰り返し */
+        .g14 { --angle: -50deg; animation-delay: 6.5s; }
+        .g15 { --angle: 50deg;  animation-delay: 7s; }
+    </style>
+</head>
+<body>
+    <div class="fountain-container">
+        <div class="greeting-unit g1">こんにちは</div>
+        <div class="greeting-unit g2">Hello</div>
+        <div class="greeting-unit g3">Hola</div>
+        <div class="greeting-unit g4">你好</div>
+        <div class="greeting-unit g5">Bonjour</div>
+        <div class="greeting-unit g6">안녕하세요</div>
+        <div class="greeting-unit g7">Guten Tag</div>
+        
+        <div class="greeting-unit g8">Ciao</div>
+        <div class="greeting-unit g9">Olá</div>
+        <div class="greeting-unit g10">Здравствуйте</div>
+        <div class="greeting-unit g11">مرحبا</div>
+        <div class="greeting-unit g12">Goddag</div>
+        <div class="greeting-unit g13">Dobrý den</div>
+        <div class="greeting-unit g14">Selamat siang</div>
+        
+        <div class="greeting-unit g15">Xin chào</div>
+        <div class="greeting-unit g3">Hujambo</div>
+        <div class="greeting-unit g6">Shalom</div>
+        <div class="greeting-unit g9">Kaliméra</div>
+        <div class="greeting-unit g12">こんにちは</div>
+        <div class="greeting-unit g15">Hello</div>
+
+        </div>
+</body>
+</html>
